@@ -64,3 +64,10 @@ TERRAFORM
 - github is for text files and state is binary file
 - in git we put terraform files
 - 
+=============================================================================================================
+- install terraform 
+- terraform --help
+- terraform apply --help
+- first thing is we need terraform init .
+- then terraform plan
+- then terraform apply

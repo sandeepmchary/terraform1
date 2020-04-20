@@ -1,0 +1,128 @@
+- creating variable
+- create variable.tf
+- EX: HERE WE HAVE 3 environments FOR 3 ENVIRONMENTS WE HAVE TO MAINTAIN 3 VPC ID'S AND 3 INSTANCE TYPE
+- SOL: WE HAVE TO CREATE 3 DIFERENT VARIABLES FILES FOR 3 DIFFERENT ENVIRONMENTS
+- IN REAL TIME WE IN THIS MAIN DIRECTORY, WE CREATE 3 SUB DIRECTORIES 
+    - DEV
+        - CREATE FILE dev.tfvars
+        - from the variables.tf file check what needs to changed in the dev environments
+        - for example for dev environments we need only change is instance type 
+        - in dev.tfvars
+        - instancetype = "t2.nano"
+    - ST
+    - UAT
+    - same as for above two folders
+    - for running that 
+    - terraform apply  -var "accesskey=" -var "secretkey=" "UAT/uat.tfvars" .
+    - in tfvars file we need only key = value
+    - like instancetype="t3.medium"
+    - QUESTIONS:
+        - if the directory already has any .tf in it , so dont need terraform init 
+    - USE CASE
+        - ONE NGINX SERVERS
+        - TWO TOMCAT SERVERS
+        - ONE DATABASE SERVER (HERE WE ARE USING AMAZON RDS)
+        - NGINX IN AZURE
+        - TOMCAT IN EC2
+    - "AFTER BUILD AND COMPILED THE APPLICATION WE CREATE THE ENVIRONMENT"
+    - NEXT CLASS IS ABOUT CREATING ABOVE CASE AND UPDATING 
+
+
+
+================================================================================================
+main.tf
+
+# same file in three different environments
+# 
+provider "aws" {
+  region = "${var.region}"
+  access_key = "${var.accesskey}"
+  secret_key = "${var.secretkey}"
+
+}
+
+resource "aws_instance" "one" {
+  ami = "${var.imageid}"
+  instance_type = "${var.instancetype}"
+  key_name = "${var.key}"
+  security_groups = ["${aws_security_group.allow_all.name}"]
+  }
+
+resource "aws_instance" "two" {
+  ami = "${var.imageid}"
+  instance_type = "${var.instancetype}"
+  key_name = "${var.key}"
+  security_groups = ["${aws_security_group.allow_all.name}"]
+}
+
+resource "aws_security_group" "allow_all" {
+  name = "allow_all"
+  description = "Allow all traffic"
+  vpc_id = "vpc-2d13ea46"
+
+  ingress{
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+      description = "allow all traffic outside"
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+================================================================================================
+variables.tf
+
+variable "region" {
+  default = "us-east-2"
+}
+variable "accesskey" {
+  type = string
+}
+variable "secretkey" {
+  type = string
+}
+variable "imageid" {
+  default = "ami-01e36b7901e884a10"
+}
+
+variable "key" {
+  default = "samdevops"
+}
+
+variable "instancetype" {
+  default = "t2.micro"
+}
+================================================================================================
+output.tf
+output "PublicIp" {
+  value = "${aws_instance.one.public_ip}"
+}
+
+output "PrivateIp" {
+  value = "${aws_instance.one.private_ip}"
+}
+
+
+output "Publicip_for_two" {
+  value = "${aws_instance.two.public_ip}"
+}
+
+output "Public_ip_for_two" {
+  value = "${aws_instance.two.private_ip}"
+}
+================================================================================================
+
+
+
+
+
+
+
+
+
